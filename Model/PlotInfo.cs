@@ -1,34 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Prism.Mvvm;
+using System;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace VisualHFT.Model
 {
-    public class PlotInfo : INotifyPropertyChanged
+    public class PlotInfo : BindableBase
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-        private void RaisePropertyChanged([CallerMemberName] String propertyName = "")
-        {
-            if (PropertyChanged != null)
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-        }
-        double _value;
         public DateTime Date { get; set; }
+
+        double _value;
         public double Value
         {
-            get { return _value; }
-            set
-            {
-                if (_value != value)
-                {
-                    _value = value;
-                    RaisePropertyChanged();
-                }
-            }
+            get => _value;
+            set => SetProperty(ref _value, value);            
         }
     }
 }

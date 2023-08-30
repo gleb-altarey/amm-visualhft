@@ -1,21 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Windows.Input;
-using System.Windows;
 using VisualHFT.Helpers;
-using VisualHFT.View.StatisticsView;
 using System.Data;
 using VisualHFT.Model;
-using System.Runtime.CompilerServices;
 
 namespace VisualHFT.ViewModel
 {
-    public class vmStrategyParameterFirmBB: vmStrategyParametersBase<StrategyParametersFirmBBVM>, INotifyPropertyChanged
+    public class vmStrategyParameterFirmBB: vmStrategyParametersBase<StrategyParametersFirmBBVM>
     {
 
         public vmStrategyParameterFirmBB(Dictionary<string, Func<string, string, bool>> dialogs) : base(dialogs)

@@ -95,30 +95,6 @@
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Xml" />
-    <Reference Include="Telerik.Windows.Controls, Version=2017.3.1018.45, Culture=neutral, PublicKeyToken=5803cfa389c90ce7, processorArchitecture=MSIL">
-      <HintPath>..\hftNoLocks\hftVS2015\lib\RCWPF\2017.3.1018.45\Telerik.Windows.Controls.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Telerik.Windows.Controls.Chart, Version=2017.3.1018.45, Culture=neutral, PublicKeyToken=5803cfa389c90ce7, processorArchitecture=MSIL">
-      <HintPath>..\hftNoLocks\hftVS2015\lib\RCWPF\2017.3.1018.45\Telerik.Windows.Controls.Chart.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Telerik.Windows.Controls.Data, Version=2017.3.1018.45, Culture=neutral, PublicKeyToken=5803cfa389c90ce7, processorArchitecture=MSIL">
-      <HintPath>..\hftNoLocks\hftVS2015\lib\RCWPF\2017.3.1018.45\Telerik.Windows.Controls.Data.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Telerik.Windows.Controls.GridView, Version=2017.3.1018.45, Culture=neutral, PublicKeyToken=5803cfa389c90ce7, processorArchitecture=MSIL">
-      <HintPath>..\hftNoLocks\hftVS2015\lib\RCWPF\2017.3.1018.45\Telerik.Windows.Controls.GridView.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Telerik.Windows.Controls.Input, Version=2017.3.1018.45, Culture=neutral, PublicKeyToken=5803cfa389c90ce7, processorArchitecture=MSIL">
-      <HintPath>..\hftNoLocks\hftVS2015\lib\RCWPF\2017.3.1018.45\Telerik.Windows.Controls.Input.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Telerik.Windows.Data, Version=2017.3.1018.45, Culture=neutral, PublicKeyToken=5803cfa389c90ce7, processorArchitecture=MSIL">
-      <HintPath>..\hftNoLocks\hftVS2015\lib\RCWPF\2017.3.1018.45\Telerik.Windows.Data.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -131,30 +107,70 @@
     <Compile Include="AnalyticReports\AnalyticReports.xaml.cs">
       <DependentUpon>AnalyticReports.xaml</DependentUpon>
     </Compile>
-    <Compile Include="AnalyticReports\ucCharts.xaml.cs">
+    <Compile Include="Converters\EnumToListConverter.cs" />
+    <Compile Include="Converters\GreaterThanZeroConverter.cs" />
+    <Compile Include="Converters\IsNaNConverter.cs" />
+    <Compile Include="Converters\LessThanZeroConverter.cs" />
+    <Compile Include="Converters\StringEqualityConverter.cs" />
+    <Compile Include="DataRetriever\DataParsers\FixParser.cs" />
+    <Compile Include="DataRetriever\DataParsers\IDataParser.cs" />
+    <Compile Include="DataRetriever\DataParsers\JsonParser.cs" />
+    <Compile Include="DataRetriever\DataProcessor.cs" />
+    <Compile Include="DataRetriever\FIXDataRetriever.cs" />
+    <Compile Include="DataRetriever\IDataSource.cs" />
+    <Compile Include="DataRetriever\KafkaDataRetriever.cs" />
+    <Compile Include="DataRetriever\WebSocketDataRetriever.cs" />
+    <Compile Include="DataRetriever\ZeroMQDataRetriever.cs" />
+    <Compile Include="DataTradeRetriever\EmptyTradesRetriever.cs" />
+    <Compile Include="DataTradeRetriever\IDataTradeRetriever.cs" />
+    <Compile Include="DataTradeRetriever\FIXTradesRetriever.cs" />
+    <Compile Include="DataTradeRetriever\MSSQLServerTradesRetriever.cs" />
+    <Compile Include="Helpers\AggregatedCollection.cs" />
+    <Compile Include="Helpers\HelperPnLCalculator.cs" />
+    <Compile Include="Model\LOBImbalance.cs" />
+    <Compile Include="Model\VPIN.cs" />
+    <Compile Include="Studies\LOBImbalanceStudy.cs" />
+    <Compile Include="Studies\VPINStudy.cs" />
+    <Compile Include="Model\PositionManager.cs" />
+    <Compile Include="Model\ScatterChartData.cs" />
+    <Compile Include="Model\cPLRangeDuration.cs" />
+    <Compile Include="Model\cListPLRanges.cs" />
+    <Compile Include="Model\cTop20.cs" />
+    <Compile Include="Model\cheldBars.cs" />
+    <Compile Include="AnalyticReports\ViewModel\vmCharts.cs" />
+    <Compile Include="AnalyticReports\ViewModel\vmChartsStatistics.cs" />
+    <Compile Include="AnalyticReports\ViewModel\vmEquityChart.cs" />
+    <Compile Include="AnalyticReports\ViewModel\vmOverview.cs" />
+    <Compile Include="AnalyticReports\ViewModel\vmStats.cs" />
+    <Compile Include="AnalyticReports\ViewModel\vmStrategyHeader.cs" />
+    <Compile Include="AnalyticReports\View\ucCharts.xaml.cs">
       <DependentUpon>ucCharts.xaml</DependentUpon>
     </Compile>
-    <Compile Include="AnalyticReports\ucChartsStatistics.xaml.cs">
+    <Compile Include="AnalyticReports\View\ucChartsStatistics.xaml.cs">
       <DependentUpon>ucChartsStatistics.xaml</DependentUpon>
     </Compile>
-    <Compile Include="AnalyticReports\ucEquityChart.xaml.cs">
+    <Compile Include="AnalyticReports\View\ucEquityChart.xaml.cs">
       <DependentUpon>ucEquityChart.xaml</DependentUpon>
     </Compile>
-    <Compile Include="AnalyticReports\ucOverview.xaml.cs">
+    <Compile Include="AnalyticReports\View\ucOverview.xaml.cs">
       <DependentUpon>ucOverview.xaml</DependentUpon>
     </Compile>
-    <Compile Include="AnalyticReports\ucStats.xaml.cs">
+    <Compile Include="AnalyticReports\View\ucStats.xaml.cs">
       <DependentUpon>ucStats.xaml</DependentUpon>
     </Compile>
-    <Compile Include="AnalyticReports\ucStrategyHeader.xaml.cs">
+    <Compile Include="AnalyticReports\View\ucStrategyHeader.xaml.cs">
       <DependentUpon>ucStrategyHeader.xaml</DependentUpon>
     </Compile>
     <Compile Include="Converters\ConverterEnum.cs" />
+    <Compile Include="Converters\ConverterIsBuyToColor.cs" />
+    <Compile Include="Converters\ConverterValueToWidth.cs" />
     <Compile Include="Converters\DispatchedObservableCollectionConverter.cs" />
+    <Compile Include="Extensions\IEnumerableExtensios.cs" />
     <Compile Include="Extensions\ObservableCollectionEx.cs" />
     <Compile Include="Formatters\FormatterKilo.cs" />
     <Compile Include="Helpers\DispatchedObservableCollection.cs" />
     <Compile Include="Helpers\DispatchedViewModelBase.cs" />
+    <Compile Include="Helpers\HelperAggregatedPlotCollection.cs" />
     <Compile Include="Helpers\HelperAnalytics.cs" />
     <Compile Include="Helpers\HelperFormat.cs" />
     <Compile Include="Helpers\HelperMath.cs" />
@@ -163,11 +179,11 @@
     <Compile Include="Helpers\HelperOrderBook.cs" />
     <Compile Include="Helpers\HelperExposure.cs" />
     <Compile Include="Helpers\HelperActiveOrders.cs" />
+    <Compile Include="Helpers\HelperTrade.cs" />
     <Compile Include="Helpers\HelperProvider.cs" />
     <Compile Include="Helpers\HelperStrategy.cs" />
     <Compile Include="Helpers\HelperStrategyParams.cs" />
     <Compile Include="Helpers\HelperUtility.cs" />
-    <Compile Include="Helpers\HelperWebsocket.cs" />
     <Compile Include="Converters\ConverterStringFormat.cs" />
     <Compile Include="Converters\ConverterValuesToColorIfEquals.cs" />
     <Compile Include="Converters\ConverterValuesToColorIfNotEqualZero.cs" />
@@ -182,7 +198,9 @@
     <Compile Include="Model\BookItemPriceSplit.cs" />
     <Compile Include="Model\BookItem.cs" />
     <Compile Include="Model\cBalance.cs" />
+    <Compile Include="Model\cDrawDown.cs" />
     <Compile Include="Model\cEquity.cs" />
+    <Compile Include="Model\cHourSerie.cs" />
     <Compile Include="Model\CloseExecution.cs">
       <DependentUpon>hftModel.tt</DependentUpon>
     </Compile>
@@ -210,6 +228,7 @@
     </Compile>
     <Compile Include="Model\OrderBook.cs" />
     <Compile Include="Model\OrderBookLevel.cs" />
+    <Compile Include="Studies\OrderFlowAnalysis.cs" />
     <Compile Include="Model\OrderVM.cs" />
     <Compile Include="Model\PlotInfoPriceChart.cs" />
     <Compile Include="Model\PlotInfo.cs" />
@@ -221,7 +240,8 @@
     <Compile Include="Model\Provider.cs">
       <DependentUpon>hftModel.tt</DependentUpon>
     </Compile>
-    <Compile Include="Model\ProviderVM.cs" />
+    <Compile Include="Model\Trade.cs" />
+    <Compile Include="Model\ProviderEx.cs" />
     <Compile Include="Model\StrategyParameter.cs">
       <DependentUpon>hftModel.tt</DependentUpon>
     </Compile>
@@ -247,17 +267,17 @@
     <Compile Include="UserControls\Block.xaml.cs">
       <DependentUpon>Block.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UserControls\DispatchedCollection.xaml.cs">
-      <DependentUpon>DispatchedCollection.xaml</DependentUpon>
-    </Compile>
     <Compile Include="UserControls\LoadingAnimation.xaml.cs">
       <DependentUpon>LoadingAnimation.xaml</DependentUpon>
     </Compile>
     <Compile Include="UserControls\LoadingAnimationSmall.xaml.cs">
       <DependentUpon>LoadingAnimationSmall.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ViewModel\StatisticsViewModel\ChartDateCategoryDataPoint.cs" />
     <Compile Include="ViewModel\StatisticsViewModel\vmStrategyOverview.cs" />
+    <Compile Include="ViewModel\Studies\vmLOBImbalances.cs" />
     <Compile Include="ViewModel\vmDashboard.cs" />
+    <Compile Include="ViewModel\vmOrderBookFlowAnalysis.cs" />
     <Compile Include="ViewModel\vmPosition.cs" />
     <Compile Include="ViewModel\vmOrderBook.cs" />
     <Compile Include="ViewModel\vmPriceCharting.cs" />
@@ -267,11 +287,18 @@
     <Compile Include="ViewModel\vmStrategyParameterHFTAcceptor.cs" />
     <Compile Include="ViewModel\vmStrategyParameterFirmMM.cs" />
     <Compile Include="ViewModel\vmStrategyParametersBase.cs" />
+    <Compile Include="ViewModel\Studies\vmVPIN.cs" />
+    <Compile Include="View\GenericHistoricalLineChart.xaml.cs">
+      <DependentUpon>GenericHistoricalLineChart.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\PriceCharting.xaml.cs">
       <DependentUpon>PriceCharting.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\StatisticsView\ucStrategyOverview.xaml.cs">
       <DependentUpon>ucStrategyOverview.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Studies\LOBImbalances.xaml.cs">
+      <DependentUpon>LOBImbalances.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\ucPositions.xaml.cs">
       <DependentUpon>ucPositions.xaml</DependentUpon>
@@ -294,6 +321,9 @@
     <Compile Include="View\ucStrategyParameterFirmMM.xaml.cs">
       <DependentUpon>ucStrategyParameterFirmMM.xaml</DependentUpon>
     </Compile>
+    <Compile Include="View\Studies\VPIN.xaml.cs">
+      <DependentUpon>VPIN.xaml</DependentUpon>
+    </Compile>
     <Page Include="AnalyticReports\AnalyticReports.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -302,29 +332,29 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="AnalyticReports\ucCharts.xaml">
-      <Generator>MSBuild:Compile</Generator>
+    <Page Include="AnalyticReports\View\ucCharts.xaml">
       <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="AnalyticReports\ucChartsStatistics.xaml">
-      <Generator>MSBuild:Compile</Generator>
+    <Page Include="AnalyticReports\View\ucChartsStatistics.xaml">
       <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="AnalyticReports\ucEquityChart.xaml">
-      <Generator>MSBuild:Compile</Generator>
+    <Page Include="AnalyticReports\View\ucEquityChart.xaml">
       <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="AnalyticReports\ucOverview.xaml">
-      <Generator>MSBuild:Compile</Generator>
+    <Page Include="AnalyticReports\View\ucOverview.xaml">
       <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="AnalyticReports\ucStats.xaml">
-      <Generator>MSBuild:Compile</Generator>
+    <Page Include="AnalyticReports\View\ucStats.xaml">
       <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="AnalyticReports\ucStrategyHeader.xaml">
-      <Generator>MSBuild:Compile</Generator>
+    <Page Include="AnalyticReports\View\ucStrategyHeader.xaml">
       <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="GlobalStyle.xaml">
       <SubType>Designer</SubType>
@@ -333,10 +363,6 @@
     <Page Include="UserControls\Block.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="UserControls\DispatchedCollection.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UserControls\LoadingAnimation.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -359,6 +385,10 @@
       <DependentUpon>Dashboard.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="View\GenericHistoricalLineChart.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="View\PriceCharting.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -366,6 +396,10 @@
     <Page Include="View\StatisticsView\ucStrategyOverview.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Studies\LOBImbalances.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="View\ucPositions.xaml">
       <SubType>Designer</SubType>
@@ -394,6 +428,10 @@
     <Page Include="View\ucStrategyParameterFirmMM.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\Studies\VPIN.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>
@@ -448,6 +486,10 @@
     <Resource Include="Images\refresh.png" />
     <Resource Include="Images\database.png" />
     <Resource Include="Images\sendingParam.png" />
+    <Resource Include="Images\new-window.png" />
+    <Resource Include="Images\pop-up.png" />
+    <Resource Include="Images\LOBImbalance.png" />
+    <Resource Include="Images\VPIN.png" />
     <Content Include="Model\hftModel.Context.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>hftModel.Context1.cs</LastGenOutput>
@@ -458,13 +500,6 @@
       <LastGenOutput>hftModel.cs</LastGenOutput>
       <DependentUpon>hftModel.edmx</DependentUpon>
     </Content>
-    <Content Include="Telerik\Telerik.Windows.Controls.Chart.dll" />
-    <Content Include="Telerik\Telerik.Windows.Controls.Charting.dll" />
-    <Content Include="Telerik\Telerik.Windows.Controls.Data.dll" />
-    <Content Include="Telerik\Telerik.Windows.Controls.dll" />
-    <Content Include="Telerik\Telerik.Windows.Controls.GridView.dll" />
-    <Content Include="Telerik\Telerik.Windows.Controls.Input.dll" />
-    <Content Include="Telerik\Telerik.Windows.Data.dll" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5">
@@ -482,6 +517,9 @@
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Confluent.Kafka">
+      <Version>2.2.0</Version>
+    </PackageReference>
     <PackageReference Include="EntityFramework">
       <Version>6.4.4</Version>
     </PackageReference>
@@ -492,16 +530,16 @@
       <Version>4.0.0</Version>
     </PackageReference>
     <PackageReference Include="MahApps.Metro">
-      <Version>2.4.9</Version>
+      <Version>2.4.10</Version>
     </PackageReference>
     <PackageReference Include="MahApps.Metro.IconPacks">
       <Version>4.11.0</Version>
     </PackageReference>
     <PackageReference Include="MaterialDesignColors">
-      <Version>2.0.9</Version>
+      <Version>2.1.4</Version>
     </PackageReference>
     <PackageReference Include="MaterialDesignThemes">
-      <Version>4.6.1</Version>
+      <Version>4.9.0</Version>
     </PackageReference>
     <PackageReference Include="MaterialDesignThemes.MahApps.163">
       <Version>0.0.111</Version>
@@ -509,8 +547,23 @@
     <PackageReference Include="Microsoft.Web.Xdt">
       <Version>7.0.0-preview.22423.2</Version>
     </PackageReference>
+    <PackageReference Include="MvvmLightLibs">
+      <Version>5.4.1.1</Version>
+    </PackageReference>
+    <PackageReference Include="NetMQ">
+      <Version>4.0.1.13</Version>
+    </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
-      <Version>13.0.2-beta2</Version>
+      <Version>13.0.3</Version>
+    </PackageReference>
+    <PackageReference Include="OxyPlot.Contrib.Wpf">
+      <Version>2.1.2</Version>
+    </PackageReference>
+    <PackageReference Include="Prism.Wpf">
+      <Version>8.1.97</Version>
+    </PackageReference>
+    <PackageReference Include="QuickFix.Net.NetStandard">
+      <Version>1.7.9</Version>
     </PackageReference>
     <PackageReference Include="System.Net.Security">
       <Version>4.3.2</Version>

@@ -1,23 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Prism.Mvvm;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace VisualHFT.Model
 {
-    public class StrategyVM : INotifyPropertyChanged
+    public class StrategyVM : BindableBase
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void RaisePropertyChanged(string propertyName)
+        private string _strategyCode;
+        public string StrategyCode 
         {
-            PropertyChangedEventHandler handler = PropertyChanged;
-            if (handler != null)
-            {
-                handler(this, new PropertyChangedEventArgs(propertyName));
-            }
+            get => _strategyCode;
+            set => SetProperty(ref _strategyCode, value);
         }
-        public string StrategyCode { get; set; }
     }
 }

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace VisualHFT.Model
 {
@@ -22,12 +20,5 @@ namespace VisualHFT.Model
             else
                 return null;
         }
-    }
-    public class cDrawDown
-    {
-        public DateTime Date { get; set; }
-        public decimal DrawDownAmmount { get; set; }
-        public decimal DrawDownPerc { get; set; }
-        public int DrawDownHours { get; set; }
     }
 }

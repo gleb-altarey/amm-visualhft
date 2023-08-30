@@ -6,21 +6,13 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-using Telerik.Windows.Controls.ChartView;
 
 namespace VisualHFT.View
 {
-	public class SeriesViewModel
+    public class SeriesViewModel
 	{
 		public string Key { get; set; }
 		public string SeriesType { get; set; }
@@ -126,7 +118,7 @@ namespace VisualHFT.View
 
 			//fill providers
 			var allProviders = HelperCommon.PROVIDERS.Select(x => x.Value).ToList();
-			allProviders.Insert(0, new Model.ProviderVM() { ProviderID = 0, ProviderName = "ALL" });
+			allProviders.Insert(0, new Model.ProviderEx() { ProviderCode = 0, ProviderName = "ALL" });
 			lstProviders.ItemsSource = allProviders;
 
 		}
@@ -173,9 +165,11 @@ namespace VisualHFT.View
 					{
 						if (selectedProviders.Any(x => x == "ALL") || selectedProviders.Any(x => x == _prov.Value.ProviderName))
 						{
-							string _key = _prov.Value.ProviderID.ToString() + "_" + _selectedSymbol;
-							OrderBook orderBook;
-							HelperCommon.LIMITORDERBOOK.TryGetValue(_key, out orderBook);
+							string _key = _prov.Value.ProviderCode.ToString() + "_" + _selectedSymbol;
+							OrderBook orderBook = new OrderBook();
+							
+							//DEPRECIATED method -> This module won't work
+							//HelperCommon.LIMITORDERBOOK.TryGetValue(_key, out orderBook);
 							if (orderBook == null)
 								continue;
 							
@@ -204,9 +198,9 @@ namespace VisualHFT.View
 								colPrices.RemoveAt(0);
 							}
 							double MidPoint = 0;
-							if (tobASK.Price > 0 && tobBID.Price > 0)
+							if (tobASK.Price.HasValue && tobBID.Price.HasValue)
 							{
-								MidPoint = (tobASK.Price + tobBID.Price) / 2;
+								MidPoint = (tobASK.Price.Value + tobBID.Price.Value) / 2;
 							}
 
 							DateTime maxDate = DateTime.Now;// Max(colPrices.DefaultIfEmpty(new PlotInfoPriceChart()).Max(d => d.Date), Max(tobASK.LocalTimeStamp, tobBID.LocalTimeStamp));
@@ -214,9 +208,9 @@ namespace VisualHFT.View
 							{
 								Date = maxDate,
 								MidPrice = MidPoint,
-								AskPrice = tobASK.Price,
-								BidPrice = tobBID.Price,
-								Volume = tobASK.Size + tobBID.Size,
+								AskPrice = tobASK.Price.Value,
+								BidPrice = tobBID.Price.Value,
+								Volume = tobASK.Size.Value + tobBID.Size.Value,
 								//StrokeAsk = GetNextBrush(provIndex),
 								//StrokeMiddle = GetNextBrush(provIndex),
 								//StrokeBid = GetNextBrush(provIndex)
@@ -248,7 +242,8 @@ namespace VisualHFT.View
 
 		private Brush GetNextBrush(int index)
 		{
-			return chart.Palette.SeriesEntries[index].First().Fill;
-		}
+            //return chart.Palette.SeriesEntries[index].First().Fill;
+            throw new NotImplementedException();
+        }
 	}
 }

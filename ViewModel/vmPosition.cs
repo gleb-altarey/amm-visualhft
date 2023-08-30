@@ -1,108 +1,116 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Windows.Input;
 using System.Windows;
 using VisualHFT.Helpers;
-using System.IO;
 using VisualHFT.Model;
-using System.Windows.Data;
 using System.Runtime.CompilerServices;
 using System.Windows.Threading;
+using Prism.Mvvm;
+using System.Windows.Input;
+using System.Windows.Controls;
+//using GalaSoft.MvvmLight.Command;
+using System.Windows.Data;
+using GalaSoft.MvvmLight.Command;
+using QuickFix.Fields;
+using System.Threading;
 
 namespace VisualHFT.ViewModel
 {
-    public class vmPosition : INotifyPropertyChanged
+    public class vmPosition : BindableBase, IDisposable
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-        private void RaisePropertyChanged([CallerMemberName] String propertyName = "")
-        {
-            if (PropertyChanged != null)
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-        }
 
         private string _selectedSymbol;
         private string _selectedStrategy;
         private DateTime _selectedDate;
-        private Dictionary<string, Func<string, string, bool>> _dialogs;
-        System.ComponentModel.BackgroundWorker bwLoadPositions = new System.ComponentModel.BackgroundWorker();
-        ObservableCollection<Exposure> _exposures;
-        ObservableCollection<PositionEx> _positions;
-        ObservableCollection<ExecutionVM> _executions;
-        ObservableCollection<OrderVM> _activeOrders;
-        object _lockActiveOrders = new object();
+        private Dictionary<string, Func<string, string, bool>> _dialogs;        
+        private ObservableCollection<OrderVM> _allOrders;
+        private ObservableCollection<PositionManager> _positionsManager;
+        private readonly object _locker = new object();
+        private bool _disposed = false; // to track whether the object has been disposed
+
+        public ICollectionView OrdersView { get; }
+        public ICommand FilterCommand { get; }
+
 
         public vmPosition(Dictionary<string, Func<string, string, bool>> dialogs)
         {
-            if (System.ComponentModel.DesignerProperties.GetIsInDesignMode(new DependencyObject()))
-                return;
+            /*if (DesignerProperties.GetIsInDesignMode(new DependencyObject()))
+                return;*/
+
+
             this._dialogs = dialogs;
-            _positions = new ObservableCollection<PositionEx>();
-            _exposures = new ObservableCollection<Exposure>();
-            _activeOrders = new ObservableCollection<OrderVM>();
-            RaisePropertyChanged("Exposures");
-            RaisePropertyChanged("ActiveOrders");
+            PositionsManager = new ObservableCollection<PositionManager>();            
+            FilterCommand = new RelayCommand<string>(OnFilterChanged);
+            this.SelectedDate = DateTime.Now; //new DateTime(2022, 10, 6); 
+
+            lock (_locker)
+            {
+                _allOrders = new ObservableCollection<OrderVM>();
+                OrdersView = CollectionViewSource.GetDefaultView(_allOrders);
+                OrdersView.SortDescriptions.Add(new SortDescription("CreationTimeStamp", ListSortDirection.Descending));
+            }
 
 
-            HelperCommon.CLOSEDPOSITIONS.OnDataReceived += CLOSEDPOSITIONS_OnDataReceived;
-			HelperCommon.CLOSEDPOSITIONS.OnInitialLoad += CLOSEDPOSITIONS_OnInitialLoad;
-            
-
+            HelperCommon.EXECUTEDORDERS.OnInitialLoad += EXECUTEDORDERS_OnInitialLoad;
+            HelperCommon.EXECUTEDORDERS.OnDataReceived += EXECUTEDORDERS_OnDataReceived;
             HelperCommon.EXPOSURES.OnDataReceived += EXPOSURES_OnDataReceived;
             HelperCommon.ACTIVEORDERS.OnDataReceived += ACTIVEORDERS_OnDataReceived;
             HelperCommon.ACTIVEORDERS.OnDataRemoved += ACTIVEORDERS_OnDataRemoved;
-            this.SelectedDate = DateTime.Now;
         }
-
+        ~vmPosition()
+        {
+            Dispose(false);
+        }
 
         private void ACTIVEORDERS_OnDataRemoved(object sender, OrderVM e)
         {
             if (e == null || string.IsNullOrEmpty(_selectedStrategy))
                 return;
-            var existingItem = _activeOrders.Where(x => x.ClOrdId == e.ClOrdId).FirstOrDefault();
+            
+            OrderVM existingItem = null;
+            lock (_locker)
+                existingItem = _allOrders.Where(x => x.ClOrdId == e.ClOrdId).FirstOrDefault();
             if (existingItem != null)
             {
                 Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Render, new Action(() => {
-                    lock (_lockActiveOrders)
-                        _activeOrders.Remove(existingItem);
+                    lock (_locker)
+                        _allOrders.Remove(existingItem);
                 }));                
             }
-        }
 
+        }
         private void ACTIVEORDERS_OnDataReceived(object sender, OrderVM e)
         {
             if (e == null || string.IsNullOrEmpty(_selectedStrategy))
                 return;
             if (e != null)
             {
-                lock (_lockActiveOrders)
-                {
-                    var existingItem = _activeOrders.Where(x => x.ClOrdId == e.ClOrdId).FirstOrDefault();
-                    if (existingItem == null)
-                    {
-                        Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Render, new Action(() =>
-                        {
-                            _activeOrders.Add(e);
-                        }));
+                OrderVM existingItem = null;
 
-                    }
-                    else
+                lock (_locker)
+                    existingItem = _allOrders.Where(x => x.ClOrdId == e.ClOrdId).FirstOrDefault();
+                if (existingItem == null)
+                {
+                    Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Render, new Action(() =>
                     {
-                        existingItem.Update(e);
-                    }
+                        lock (_locker)
+                            _allOrders.Add(e);
+                    }));
+                }
+                else
+                {
+                    existingItem.Update(e);
                 }
             }
         }
-
         private void EXPOSURES_OnDataReceived(object sender, Exposure e)
         {
             if (e == null || string.IsNullOrEmpty(_selectedStrategy))
                 return;
-            var existingItem = _exposures.Where(x => x.Symbol == e.Symbol && x.StrategyName == _selectedStrategy).FirstOrDefault();
+            /*var existingItem = _exposures.Where(x => x.Symbol == e.Symbol && x.StrategyName == _selectedStrategy).FirstOrDefault();
             if (existingItem == null)
                 _exposures.Add(e);
             else
@@ -112,139 +120,162 @@ namespace VisualHFT.ViewModel
                     existingItem.SizeExposed = e.SizeExposed;
                 if (existingItem.UnrealizedPL != e.UnrealizedPL)
                     existingItem.UnrealizedPL = e.UnrealizedPL;
+            }*/
+        }
+        private void EXECUTEDORDERS_OnInitialLoad(object sender, IEnumerable<OrderVM> e)
+        {
+            if (_allOrders.Count == 0 && !e.Any() ) return;
+
+            ReloadOrders(e.ToList());
+        }
+        private void EXECUTEDORDERS_OnDataReceived(object sender, IEnumerable<OrderVM> e)
+        {
+            lock (_locker)
+            {
+                foreach (var ord in e)
+                    _allOrders.Add(ord);
             }
         }
 
-        private void CLOSEDPOSITIONS_OnInitialLoad(object sender, IEnumerable<PositionEx> e)
-        {
-            ReloadPositions(_selectedSymbol, _selectedStrategy);
-        }
 
-        private void CLOSEDPOSITIONS_OnDataReceived(object sender, IEnumerable<PositionEx> e)
+        public ObservableCollection<OrderVM> AllOrders
         {
-            foreach(var pos in e)
-            {
-                if ((string.IsNullOrEmpty(_selectedSymbol) || pos.Symbol == _selectedSymbol) && (string.IsNullOrEmpty(_selectedStrategy) || pos.StrategyCode == _selectedStrategy))
-                {
-                    if (_positions == null)
-                        _positions = new ObservableCollection<PositionEx>();
-                    _positions.Insert(0, pos);
-                    foreach (var exec in pos.AllExecutions.Where(x => x.Status == ePOSITIONSTATUS.FILLED || x.Status == ePOSITIONSTATUS.PARTIALFILLED))
-                        _executions.Insert(0, exec);
-                }                
-            }
-		}
-
-        public ObservableCollection<Exposure> Exposures
-        {
-            get
-            {
-                return _exposures;
-            }
-        }
-        public ObservableCollection<PositionEx> Positions
-        {
-            get
-            {                
-                return _positions;
-            }
-        }
-        public ObservableCollection<ExecutionVM> Executions
-        {
-            get
-            {
-                return _executions;
-            }
-        }
-        public ObservableCollection<OrderVM> ActiveOrders
-        {
-            get
-            {
-                return _activeOrders;
-            }
-        }
-
-        public string SelectedSymbol
-        {
-            get { return _selectedSymbol; }
+            get => _allOrders;
             set
             {
-                if (_selectedSymbol != value)
-                {
-                    _selectedSymbol = value;                    
-                    RaisePropertyChanged("SelectedSymbol");
-                    ReloadPositions(_selectedSymbol, _selectedStrategy);
-                }
+                lock (_locker) 
+                    SetProperty(ref _allOrders, value);
             }
+        }
+        public ObservableCollection<PositionManager> PositionsManager
+        {
+            get => _positionsManager;
+            set
+            {
+               SetProperty(ref _positionsManager, value);
+            }
+        }
+        public string SelectedSymbol
+        {
+            get => _selectedSymbol;
+            set => SetProperty(ref _selectedSymbol, value, onChanged: () => ReloadOrders(HelperCommon.EXECUTEDORDERS.Orders.ToList()));
+
         }
         public string SelectedStrategy
         {
-            get { return _selectedStrategy; }
-            set
-            {
-                if (_selectedStrategy != value)
-                {
-                    _selectedStrategy = value;                    
-                    RaisePropertyChanged("SelectedStrategy");
-                    ReloadPositions(_selectedSymbol, _selectedStrategy);
-                }
-            }
+            get => _selectedStrategy;
+            set => SetProperty(ref _selectedStrategy, value, onChanged: () => ReloadOrders(HelperCommon.EXECUTEDORDERS.Orders.ToList()));
         }
         public DateTime SelectedDate
+        {            
+            get => _selectedDate;
+            set => SetProperty(ref _selectedDate, value, onChanged: () => HelperCommon.EXECUTEDORDERS.SessionDate = _selectedDate);
+        }
+        private string _selectedFilter = "Working";
+        public string SelectedFilter
         {
-            get { return _selectedDate; }
-            set { 
-                if (_selectedDate != value)
-                {
-                    _selectedDate = value.Date;
-                    
-                    HelperCommon.CLOSEDPOSITIONS.SessionDate = _selectedDate;
-                    RaisePropertyChanged("SelectedDate");
-                }
+            get => _selectedFilter;
+            set
+            {
+                SetProperty(ref _selectedFilter, value);
+                ApplyFilter();
             }
-                
+        }
+        public bool IsAllFilterSelected => _selectedFilter == "All";
+        private void OnFilterChanged(string filter)
+        {
+            SelectedFilter = filter;
+        }
+        private void ReloadOrders(List<OrderVM> orders)
+        {
+            string symbol = _selectedSymbol;
+            if (_selectedSymbol == "-- All symbols --")
+                symbol = "";
+            var grpSymbols = orders.GroupBy(x => x.Symbol).ToList();
+            Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Render, new Action(() => {
+                //POSITION MANAGER
+                _positionsManager.Clear();
+                foreach (var grp in grpSymbols)
+                {
+                    var existing_item = _positionsManager.Where(x => x.Symbol == grp.Key).FirstOrDefault();
+                    if (existing_item == null)
+                        _positionsManager.Add(new PositionManager(grp.ToList(), PositionManagerCalculationMethod.FIFO));
+                    else
+                        existing_item = new PositionManager(grp.ToList(), PositionManagerCalculationMethod.FIFO);
+                }
+                lock (_locker)
+                {
+                    _allOrders.Clear();
+                    _allOrders.AddRange(orders);
+                }
+                SelectedFilter = "Working";
+            }));
+
+            RaisePropertyChanged(nameof(AllOrders));
+        }
+        private void ApplyFilter()
+        {
+            if (string.IsNullOrEmpty(SelectedFilter))
+                return;
+            switch (SelectedFilter)
+            {
+                case "Working":
+                    OrdersView.Filter = o =>
+                    {
+                        var order = (OrderVM)o;
+                        return new[] { "NONE", "SENT", "NEW", "PARTIALFILLED", "CANCELEDSENT", "REPLACESENT", "REPLACED" }.Contains(order.Status.ToString())
+                               && order.CreationTimeStamp.Date == _selectedDate.Date;
+                    };
+                    break;
+                case "Filled":
+                    OrdersView.Filter = o =>
+                    {
+                        var order = (OrderVM)o;
+                        return (order.Status.ToString() == "FILLED" || order.Status.ToString() == "PARTIALFILLED")
+                               && order.CreationTimeStamp.Date == _selectedDate.Date;
+                    };
+                    break;
+                case "Cancelled":
+                    OrdersView.Filter = o =>
+                    {
+                        var order = (OrderVM)o;
+                        return new[] { "CANCELED", "REJECTED" }.Contains(order.Status.ToString())
+                               && order.CreationTimeStamp.Date == _selectedDate.Date;
+                    };
+                    break;
+                case "All":
+                    OrdersView.Filter = o => ((OrderVM)o).CreationTimeStamp.Date == _selectedDate.Date;
+                    //OrdersView.Filter = null;
+                    break;
+            }
+            // Ensure the sort description is still in place
+            if (!OrdersView.SortDescriptions.Any(sd => sd.PropertyName == "CreationTimeStamp"))
+            {
+                OrdersView.SortDescriptions.Add(new SortDescription("CreationTimeStamp", ListSortDirection.Descending));
+            }
+
+            OrdersView.Refresh();
         }
 
-
-        private void ReloadPositions(string symbol, string strategyCode)
+        protected virtual void Dispose(bool disposing)
         {
-            if (!bwLoadPositions.WorkerSupportsCancellation)
+            if (!_disposed)
             {
-                bwLoadPositions.WorkerSupportsCancellation = true; //use it to know if it was already setup
-                bwLoadPositions.DoWork += (s, args) =>
+                if (disposing)
                 {
-                    try
-                    {
-                        if (symbol == "-- All symbols --")
-                            symbol = "";
-                        var closedPositions = HelperCommon.CLOSEDPOSITIONS.Positions
-                            .Where(x =>
-                                    (string.IsNullOrEmpty(_selectedSymbol) || x.Symbol == _selectedSymbol)
-                                    &&
-                                    (string.IsNullOrEmpty(_selectedStrategy) || x.StrategyCode == _selectedStrategy)
-                                    && x.CreationTimeStamp.Date == _selectedDate.Date
-                             ).ToList();                        
-                        _positions = new ObservableCollection<PositionEx>(closedPositions.OrderByDescending(x => x.CloseTimeStamp));
-                        //EXECUTIONS
-                        #region Executions
-                        var open = _positions.SelectMany(x => x.OpenExecutions).Where(x => (ePOSITIONSTATUS)x.Status == ePOSITIONSTATUS.FILLED || (ePOSITIONSTATUS)x.Status == ePOSITIONSTATUS.PARTIALFILLED);
-                        var close = _positions.SelectMany(x => x.CloseExecutions).Where(x => (ePOSITIONSTATUS)x.Status == ePOSITIONSTATUS.FILLED || (ePOSITIONSTATUS)x.Status == ePOSITIONSTATUS.PARTIALFILLED);
-                        List<ExecutionVM> allExecution = new List<ExecutionVM>();
-                        allExecution.AddRange(open);
-                        allExecution.AddRange(close);
-                        _executions = new ObservableCollection<ExecutionVM>(allExecution.OrderByDescending(x => x.LocalTimeStamp));
-                        #endregion
-                    }
-                    catch (Exception ex) { }
-                };
-                bwLoadPositions.RunWorkerCompleted += (s, args) =>
-                {
-                    RaisePropertyChanged("Positions");
-                    RaisePropertyChanged("Executions");
-                };
+                    HelperCommon.EXECUTEDORDERS.OnInitialLoad -= EXECUTEDORDERS_OnInitialLoad;
+                    HelperCommon.EXECUTEDORDERS.OnDataReceived -= EXECUTEDORDERS_OnDataReceived;
+                    HelperCommon.EXPOSURES.OnDataReceived -= EXPOSURES_OnDataReceived;
+                    HelperCommon.ACTIVEORDERS.OnDataReceived -= ACTIVEORDERS_OnDataReceived;
+                    HelperCommon.ACTIVEORDERS.OnDataRemoved -= ACTIVEORDERS_OnDataRemoved;
+                }
+                _disposed = true;
             }
-            if (!bwLoadPositions.IsBusy)
-                bwLoadPositions.RunWorkerAsync();
+        }
+
+        public void Dispose()
+        {
+            throw new NotImplementedException();
         }
     }
 }

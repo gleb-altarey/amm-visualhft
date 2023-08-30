@@ -51,7 +51,7 @@ namespace demoTradingCore.Models
         ONEZERO_4 = 45,
         ONEZERO_5 = 46,
         ONEZERO_6 = 47,
-
+        OKEX = 48
     };
 
     public enum eINCREMENTALTYPE
@@ -60,5 +60,11 @@ namespace demoTradingCore.Models
         DELETEITEM,
         NEWITEM
     };
-
+    public enum eSESSIONSTATUS
+    {
+        PRICE_CONNECTED_ORDER_DISCONNECTED,
+        PRICE_DSICONNECTED_ORDER_CONNECTED,
+        BOTH_CONNECTED,
+        BOTH_DISCONNECTED
+    };
 }

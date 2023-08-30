@@ -1,23 +1,17 @@
 ﻿using VisualHFT.Helpers;
 using VisualHFT.View;
-using VisualHFT.View.StatisticsView;
-using VisualHFT.ViewModel;
-using VisualHFT.ViewModel.StatisticsViewModel;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
+using VisualHFT.DataRetriever;
+using VisualHFT.DataRetriever.DataParsers;
+using System.Diagnostics;
+using VisualHFT.ViewModels;
+using VisualHFT.Model;
+using System.Collections.ObjectModel;
 using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using System.Collections.Generic;
 
 namespace VisualHFT
 {
@@ -39,8 +33,16 @@ namespace VisualHFT
             //START WEBSOCKET LISTENER THREAD 
             new Thread(() => {
                 Thread.CurrentThread.IsBackground = true;
-                HelperWebsocket oWS = new HelperWebsocket();
-                oWS.Connect();
+
+                //DATA RETRIEVER = WEBSOCKETS
+                var dataRetriever = new WebSocketDataRetriever(new JsonParser());
+                var processor = new DataProcessor(dataRetriever);
+                dataRetriever.Start();
+
+
+                while (true) { } ;
+
+
             }).Start();
 
             this.DataContext = new VisualHFT.ViewModel.vmDashboard(Helpers.HelperCommon.GLOBAL_DIALOGS);
@@ -54,11 +56,11 @@ namespace VisualHFT
             {
                 if (cboSelectedSymbol.SelectedValue == null || cboSelectedSymbol.SelectedValue.ToString() == "")
                 {
-                    oReport.Signals = Helpers.HelperCommon.CLOSEDPOSITIONS.Positions.Where(x => x.PipsPnLInCurrency.HasValue).OrderBy(x => x.CreationTimeStamp).ToList();
+                    oReport.Signals = Helpers.HelperCommon.EXECUTEDORDERS.Positions.Where(x => x.PipsPnLInCurrency.HasValue).OrderBy(x => x.CreationTimeStamp).ToList();
                 }
                 else
                 {
-                    oReport.Signals = Helpers.HelperCommon.CLOSEDPOSITIONS.Positions.Where(x => x.PipsPnLInCurrency.HasValue && cboSelectedSymbol.SelectedValue.ToString() == x.Symbol).OrderBy(x => x.CreationTimeStamp).ToList();
+                    oReport.Signals = Helpers.HelperCommon.EXECUTEDORDERS.Positions.Where(x => x.PipsPnLInCurrency.HasValue && cboSelectedSymbol.SelectedValue.ToString() == x.Symbol).OrderBy(x => x.CreationTimeStamp).ToList();
                 }
                 
             }
@@ -72,11 +74,33 @@ namespace VisualHFT
 
         }
 
-		private void ButtonPriceCharting_Click(object sender, RoutedEventArgs e)
-		{
-			PriceCharting oForm = new PriceCharting();
-			oForm.Show();
-		}
-	}
+        private void ButtonVPIN_Click(object sender, RoutedEventArgs e)
+        {
+            View.VPIN formVPIN = new View.VPIN();
+            formVPIN.DataContext = new vmVPIN();
+            formVPIN.Closed += (sender2, e2) =>
+            {
+                if (formVPIN.DataContext is IDisposable disposable)
+                {
+                    disposable.Dispose();
+                }
+            };
+            formVPIN.Show();
+        }
+        private void ButtonLOBImbalances_Click(object sender, RoutedEventArgs e)
+        {
+            var form = new LOBImbalances();
+            form.DataContext = new vmLOBImbalances();
+            form.Closed += (sender2, e2) =>
+            {
+                if (form.DataContext is IDisposable disposable)
+                {
+                    disposable.Dispose();
+                }
+            };
+            form.Show();
+
+        }
+    }
 }
     

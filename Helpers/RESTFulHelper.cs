@@ -1,18 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Globalization;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using VisualHFT.Model;
 using System.Web;
-using VisualHFT.Extensions;
-using System.Collections.Concurrent;
 
 namespace VisualHFT.Helpers
 {
@@ -92,7 +86,7 @@ namespace VisualHFT.Helpers
             string variableName = "";
 			if (typeof(T) == typeof(List<Position>))
 				return default(T);
-			else if (typeof(T) == typeof(List<ProviderVM>))
+			else if (typeof(T) == typeof(List<Provider>))
 				return default(T);
 			//variableName = "ALLPROVIDERS";
 			else if (typeof(T) == typeof(List<StrategyParametersFirmMMVM>))
@@ -152,7 +146,7 @@ namespace VisualHFT.Helpers
             string variableName = "";
             if (typeof(T) == typeof(List<Position>))
                 variableName = "POSITIONS";
-            else if (typeof(T) == typeof(List<ProviderVM>))
+            else if (typeof(T) == typeof(List<Provider>))
                 variableName = "ALLPROVIDERS";
             else if (typeof(T) == typeof(List<StrategyParametersFirmMMVM>))
                 variableName = "STRATEGY_PARAMETERS_FIRMMM";
